@@ -1,0 +1,47 @@
+# a blessclient config that encapsulates resources in this repo
+# importing it: `blessclient import-config -url <url|local_path>`
+# blessclient install instructions https://github.com/chanzuckerberg/blessclient#install
+version: 0
+client_config:
+  aws_user_profile: czi-id
+  cert_lifetime: 30m
+  # A default ssh key. We do not use RSA keys because rsa certificates are incompatible with openssh 7.8
+  # You can generate an ed25519 key with ssh-keygen -t ed25519
+  ssh_private_key: ~/.ssh/id_ed25519
+  update_ssh_agent: true
+  remote_users:
+    - meta-powerusers
+  bastion_ips:
+    - 0.0.0.0/0
+lambda_config:
+  role_arn: arn:aws:iam::416703108729:role/blessclient
+  function_name: shared-infra-prod-bless
+  regions:
+  - aws_region: us-west-2
+    kms_auth_key_id: fe4c9d09-5006-4cb3-bb48-8b98476d3600
+  - aws_region: us-east-1
+    kms_auth_key_id: 3e3781fa-3d67-451e-8ea7-396c9120034f
+ssh_config:
+  bastions:
+    - pattern: bastion.dev.meta-infra.org
+      user: meta-powerusers
+      hosts:
+        - pattern: 10.49.*
+        - pattern: "!bastion.dev.meta-infra.org *.dev.meta-infra.org"
+    - pattern: bastion.staging.meta-infra.org
+      user: meta-powerusers
+      hosts:
+        - pattern: 10.149.*
+        - pattern: "!bastion.staging.meta-infra.org *.staging.meta-infra.org"
+    - pattern: bastion.prod.meta-infra.org
+      user: meta-powerusers
+      hosts:
+        - pattern: 10.249.*
+        - pattern: "!bastion.prod.meta-infra.org *.prod.meta-infra.org"
+        - pattern: "ds-cmpt*.scivulcan.com"
+        - pattern: ds-db1.scivulcan.com
+        - pattern: "fileimport.scivulcan.com"
+telemetry:
+  honeycomb:
+    secret_manager_arn: arn:aws:secretsmanager:us-west-2:416703108729:secret:shared-infra-prod-blessclient/blessclient-honeycomb-UlAzYK
+    dataset: blessclient
